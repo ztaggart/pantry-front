@@ -1,0 +1,22 @@
+{
+  "recipes": [
+    {
+      "id": 1,
+      "name": "oatmeal with strawberries",
+      "ingredients": "dried oats, strawberries, milk",
+      "directions": "Stir in oats, milk, and salt and cook, stirring frequently, until oatmeal is creamy and thickened, about 3 minutes. When done, mix in strawberries."
+    },
+    {
+      "id": 2,
+      "name": "cereal",
+      "ingredients": "milk, dry cereal",
+      "directions": "Place cereal in a bowl and then add milk. It's not hard. Don't you dare put milk first."
+    },
+    {
+      "id": 3,
+      "name": "salad",
+      "ingredients": "romaine lettuce, tomatoes, carrots, cucumber, other vegetables, dressing",
+      "directions": "Toss all vegetables until evenly spread. Then add dressing of your choosing."
+    }
+  ]
+}
