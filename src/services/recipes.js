@@ -1,12 +1,23 @@
 import axios from 'axios'
 const baseUrl = '/api/recipes'
 
+let token = null
+
+const setToken = newToken => {
+    token = `bearer ${newToken}`
+}
+
 const getAll = () => {
     return axios.get(baseUrl)
 }
 
-const create = (newObject) => {
-    return axios.post(baseUrl, newObject)
+const create = async (newObject) => {
+    const config = {
+        headers: {Authorization: token}
+    }
+
+    const response = await axios.post(baseUrl, newObject, config)
+    return response.data
 }
 
 const update = (id, newObject) => {
@@ -18,5 +29,5 @@ const remove = (id) => {
 }
 
 export default { 
-  getAll, create, update, remove
+  getAll, create, update, remove, setToken
 }

@@ -1,55 +1,53 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import recipeService from './services/recipes'
+import loginService from './services/login'
 import Recipe from './Recipe.js'
+import RecipeForm from './RecipeForm.js'
+import LoginForm from './LoginForm'
+import Togglable from './Toggleable'
 
 const App = (props) => {
   const [recipes, setRecipes] = useState([])
-  const [newName, setNewName] = useState('')
-  const [newIngredients, setNewIngredients] = useState('')
-  const [newDirections, setNewDirections] = useState('')
+  const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
 
-  const addRecipe = (event) => {
-    event.preventDefault();
-    const newRecipeObject = {
-      id: recipes.length + 1,
-      name: newName,
-      ingredients: newIngredients,
-      directions: newDirections
-    }
+  const recipeFormRef = useRef()
+
+  const handleLogin = async (event) => {
+    event.preventDefault()
     
-    recipeService.create(newRecipeObject)
+    try {
+      const user = await loginService.login({
+        username, password,
+      })
+      recipeService.setToken(user.token)
+      setUser(user)
+      setUsername('')
+      setPassword('')
+    } catch (exception) {
+      setErrorMessage('Wrong credentials')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
+  const addRecipe = (recipe) => {
+    recipeFormRef.current.toggleVisibility()
+    recipeService.create(recipe)
     .then(response => {
-      console.log(response)
-      setRecipes(recipes.concat(response.data))
+      setRecipes(recipes.concat(response))
     })
-    setNewName('')
-    setNewIngredients('')
-    setNewDirections('')
-  }
-
-  const handleNameChange = (event) => {
-    setNewName(event.target.value)
-  }
-
-  const handleIngredientsChange = (event) => {
-    setNewIngredients(event.target.value)
-  }
-
-  const handleDirectionsChange = (event) => {
-    setNewDirections(event.target.value)
+    .catch(() => {
+      return setErrorMessage("Recipe could not be added")
+    })
   }
 
   const handleDeleteRecipe = (id) => {
-    console.log(`recipe with id of ${id} needs to be deleted`)
     recipeService.remove(id)
     setRecipes(recipes.filter((recipe) => {return recipe.id !== id}))
-  }
-
-  const handleLogin = (event) => {
-    event.preventDefault()
-
   }
 
   useEffect(() => {
@@ -57,49 +55,40 @@ const App = (props) => {
         setRecipes(response.data)
       })
     }, [])
-  console.log('render', recipes.length, 'recipes')
+
+  
 
   return (
     <div>
       <div>
-        <form onSubmit={handleLogin}>
-          <div>
-            username
-              <input
-              type="text"
-              value={username}
-              name="Username"
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </div>
-          <div>
-            password
-              <input
-              type="password"
-              value={password}
-              name="Password"
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
-      <div>
         <h1>Recipes</h1>
-        <ul>
-          {recipes.map(recipe => 
-            <Recipe key={recipe.id} recipe={recipe} handleDeleteRecipe={() => handleDeleteRecipe(recipe.id)}/>
-          )}
-        </ul>
-        <form onSubmit={addRecipe}>
-          <label style={{marginTop:'50px'}}>Recipe Name:</label>
-          <input value={newName} onChange={handleNameChange} style={{display:'block', marginBottom:'5px'}}/>
-          <label style={{marginTop:'50px'}}>Ingredients:</label>
-          <input value={newIngredients} onChange={handleIngredientsChange} style={{display:'block', marginBottom:'5px'}}/>
-          <label style={{marginTop:'5px'}}>Directions:</label>
-          <input value={newDirections} onChange={handleDirectionsChange} style={{display:'block', marginBottom:'5px'}}/>
-          <button type="submit" style={{display:'inline-block'}}>Save Recipe</button>
-        </form>
+        {errorMessage === null ? null : <div className="error"> {errorMessage} </div>}
+
+        {user === null ?
+          <LoginForm 
+            handleSubmit={handleLogin}
+            handleUsernameChange={({ target }) => setUsername(target.value)} 
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            username={username}
+            password={password} /> :
+          <div>
+            <div>
+              <p style={{marginBottom: "0px"}}>{user.username} logged-in</p>
+              <button style={{marginBottom: "20px"}} onClick={() => setUser(null)}>
+                Log Out
+              </button>
+            </div>
+            <Togglable buttonLabel='New Recipe' ref={recipeFormRef}>
+              <RecipeForm createRecipe={addRecipe} />
+            </Togglable>
+            <ul>
+              {recipes.map(recipe =>
+                <Recipe key={recipe.id} recipe={recipe} handleDeleteRecipe={() => handleDeleteRecipe(recipe.id)} />
+              )}
+            </ul>
+          </div>
+        }
+        
       </div>
     </div>
   )
