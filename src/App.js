@@ -8,13 +8,10 @@ import Pantry from './Pantry.js'
 import LoginForm from './LoginForm'
 
 const App = (props) => {
-  const [recipes, setRecipes] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-
-  const recipeFormRef = useRef()
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -36,33 +33,6 @@ const App = (props) => {
     }
   }
 
-  const addRecipe = (recipe) => {
-    recipeFormRef.current.toggleVisibility()
-    recipeService.create(recipe)
-    .then(response => {
-      setRecipes(recipes.concat(response))
-    })
-    .catch(() => {
-      return setErrorMessage("Recipe could not be added")
-    })
-  }
-
-  const handleDeleteRecipe = (id) => {
-    recipeService.remove(id)
-    setRecipes(recipes.filter((recipe) => {return recipe.id !== id}))
-  }
-
-  const handleDeleteItem = (id) => {
-    console.log("need to delete item with id: " + id)
-  }
-
-  useEffect(() => {
-      recipeService.getAll().then(response => {
-        setRecipes(response.data)
-      })
-    }, [])
-
-
   // this only happens once because of empty array as last argument
   useEffect(() => {
     const userJSON = window.localStorage.getItem('user')
@@ -72,8 +42,6 @@ const App = (props) => {
       recipeService.setToken(user.token)
     }
   }, [])
-
-  
 
   return (
     <Router>
@@ -93,8 +61,8 @@ const App = (props) => {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/recipes" element={<Recipes recipes={recipes} errorMessage={errorMessage} addRecipe={addRecipe} recipeFormRef={recipeFormRef} handleDeleteRecipe={handleDeleteRecipe} />} />
-          <Route path="/pantry" element={<Pantry></Pantry>}></Route>
+          <Route path="/recipes" element={<Recipes errorMessage={errorMessage} setErrorMessage={setErrorMessage} />} />
+          <Route path="/pantry" element={<Pantry errorMessage={errorMessage} setErrorMessage={setErrorMessage} />}></Route>
         </Routes>
       }
     </Router>

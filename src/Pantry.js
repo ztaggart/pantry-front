@@ -4,14 +4,15 @@ import RecipeForm from "./RecipeForm"
 import Togglable from "./Toggleable"
 import PantryItem from './PantryItem'
 
-const Pantry = ({errorMessage, handleDeleteItem}) => {
+const Pantry = ({errorMessage, setErrorMessage}) => {
 
     const items = [
         {
             id: 1,
             name: "test",
             quantity: -1,
-            unit: ""
+            unit: "",
+            expiry: "1/2/3002"
         },
         {
             id: 2,
@@ -33,6 +34,12 @@ const Pantry = ({errorMessage, handleDeleteItem}) => {
         },
     ]
 
+
+
+    const handleDeleteItem = (id) => {
+        console.log("need to delete item with id: " + id)
+      }
+
     return (
         <div>
             <h1>Pantry</h1>
@@ -49,11 +56,8 @@ const Pantry = ({errorMessage, handleDeleteItem}) => {
 }
 
 Pantry.propTypes = {
-    items: PropTypes.array.isRequired,
     errorMessage: BetterPropTypes.string.isRequiredButNullable,
-    addRecipe: PropTypes.func.isRequired,
-    recipeFormRef: PropTypes.object.isRequired,
-    handleDeleteRecipe: PropTypes.func.isRequired
+    setErrorMessage: PropTypes.func.isRequired
 }
 
 export default Pantry
