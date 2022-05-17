@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import recipeService from './services/recipes'
 import loginService from './services/login'
-import Recipe from './Recipe.js'
-import RecipeForm from './RecipeForm.js'
+import Recipes from './Recipes.js'
+import Home from './Home.js'
+import Pantry from './Pantry.js'
 import LoginForm from './LoginForm'
-import Togglable from './Toggleable'
 
 const App = (props) => {
   const [recipes, setRecipes] = useState([])
@@ -23,6 +24,7 @@ const App = (props) => {
         username, password,
       })
       recipeService.setToken(user.token)
+      localStorage.setItem('user', JSON.stringify(user))
       setUser(user)
       setUsername('')
       setPassword('')
@@ -50,47 +52,52 @@ const App = (props) => {
     setRecipes(recipes.filter((recipe) => {return recipe.id !== id}))
   }
 
+  const handleDeleteItem = (id) => {
+    console.log("need to delete item with id: " + id)
+  }
+
   useEffect(() => {
       recipeService.getAll().then(response => {
         setRecipes(response.data)
       })
     }, [])
 
+
+  // this only happens once because of empty array as last argument
+  useEffect(() => {
+    const userJSON = window.localStorage.getItem('user')
+    if (userJSON) {
+      const user = JSON.parse(userJSON)
+      setUser(user)
+      recipeService.setToken(user.token)
+    }
+  }, [])
+
   
 
   return (
-    <div>
+    <Router>
+      {errorMessage === null ? null : <div className="error"> {errorMessage} </div>}
       <div>
-        <h1>Recipes</h1>
-        {errorMessage === null ? null : <div className="error"> {errorMessage} </div>}
-
-        {user === null ?
-          <LoginForm 
-            handleSubmit={handleLogin}
-            handleUsernameChange={({ target }) => setUsername(target.value)} 
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            username={username}
-            password={password} /> :
-          <div>
-            <div>
-              <p style={{marginBottom: "0px"}}>{user.username} logged-in</p>
-              <button style={{marginBottom: "20px"}} onClick={() => setUser(null)}>
-                Log Out
-              </button>
-            </div>
-            <Togglable buttonLabel='New Recipe' ref={recipeFormRef}>
-              <RecipeForm createRecipe={addRecipe} />
-            </Togglable>
-            <ul>
-              {recipes.map(recipe =>
-                <Recipe key={recipe.id} recipe={recipe} handleDeleteRecipe={() => handleDeleteRecipe(recipe.id)} />
-              )}
-            </ul>
-          </div>
-        }
-        
+        <Link style={{padding: "7px"}} to="/">Home</Link>
+        <Link style={{padding: "7px"}} to="/recipes">Recipes</Link>
+        <Link style={{padding: "7px"}} to="/pantry">Pantry</Link>
       </div>
-    </div>
+      {user === null ?
+        <LoginForm
+          handleSubmit={handleLogin}
+          handleUsernameChange={({ target }) => setUsername(target.value)}
+          handlePasswordChange={({ target }) => setPassword(target.value)}
+          username={username}
+          password={password} /> :
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/recipes" element={<Recipes recipes={recipes} errorMessage={errorMessage} addRecipe={addRecipe} recipeFormRef={recipeFormRef} handleDeleteRecipe={handleDeleteRecipe} />} />
+          <Route path="/pantry" element={<Pantry></Pantry>}></Route>
+        </Routes>
+      }
+    </Router>
   )
 }
 
