@@ -1,7 +1,11 @@
 const Home = () => {
     return (
-        <div style={{display: "flex", height: "95vh", width: "100%", textAlign: "center"}}>
-            <p style={{fontSize: "35pt"}}>Welcome home!</p>
+        <div style={{display: "grid", height: "50vh", width: "100%", textAlign: "center"}}>
+            <p style={{fontSize: "35pt", display: "block"}}>Welcome home!</p>
+
+            <div>
+                <h3 style={{display: "block"}}>What can I make?</h3>
+            </div>
         </div>
     )
 }
