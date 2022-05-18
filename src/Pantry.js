@@ -55,8 +55,6 @@ const Pantry = ({ errorMessage, setErrorMessage, userId }) => {
                     <PantryForm createItem={addItem} />
                 </Togglable>
                 <ul>
-                    {console.log("items:")}
-                    {console.log(items)}
                     {items.map(item =>
                         <div key={item.id}>
                             <PantryItem testkey={item.id} item={item} handleDelete={() => handleDeleteItem(item.id)} editItem={editItem} />
